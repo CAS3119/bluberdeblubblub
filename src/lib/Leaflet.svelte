@@ -252,33 +252,9 @@
 
   
     let endcoordsRaw = [];
-    // if (markerposes.length == 2){
-    //   for (let t = 0; t < 100; t++){
-    //     endcoordsRaw.push(lerp(markerposes[0],markerposes[1],t / 100))
-    //   }
-    // }
-  
-    // if (markerposes.length == 3){
-    //   for (let t = 0; t < 100; t++){
-    //    let t1 = lerp(markerposes[0],markerposes[1],t / 100)
-    //    let t2 = lerp(markerposes[1],markerposes[2],t / 100)
-    //    endcoordsRaw.push(lerp(t1,t2,t / 100))
-    //   }
-    // }
-    // if (markerposes.length == 4){
-    //   for (let t = 0; t < 100; t++){
-    //    let t1 = lerp(markerposes[0],markerposes[1],t / 100)
-    //    let t2 = lerp(markerposes[1],markerposes[2],t / 100)
-    //    let t3 = lerp(markerposes[2],markerposes[3],t / 100)
-    //     let t4 = lerp(t1,t2,t / 100);
-    //     let t5 = lerp(t2,t3,t / 100);
-    //     endcoordsRaw.push(lerp(t4,t5,t / 100))
-    //   }
-    // }
-
+    
     if (markerposes.length >= 4){
-      // console.log(markerposes.length)
-      // console.log((markerposes.length / 3))
+      
       for (let z = 0; z < (markerposes.length / 3)-1; z++){
 
         let w = (z * 3);
@@ -296,23 +272,7 @@
              
       }
     }
-    // if (markerposes.length > 5){
-    //   let a = markerposes.length - 1
-    //   for (let t = 0; t < 100; t++){
-    //     let f = [];
-    //     for (let z = 0; t < a; z++){
-    //       f.push(lerp(markerposes[z],markerposes[z+1],t /100));
-    //     }
-    //   }
-    // }
-  
-  
-    // let endcoords = [];
-    // endcoordsRaw.forEach(endcoord => {
-    //   console.log(endcoord)
-    //   const newLatLng = L.Projection.SphericalMercator.unproject(endcoord);
-    //   endcoords.push(newLatLng)
-    // });
+   
    
     let endcoords = unprojectArray(endcoordsRaw);
     
@@ -340,9 +300,150 @@
         className: 'flat-line'
     }).addTo(map);
   
+
+
+
+    // let yx = [];
+    
+    if (markerposes.length >= 4){
+      
+      for (let z = 0; z < (markerposes.length / 3)-1; z++){
+
+        let w = (z * 3);
+        for (let t = 0; t < 100; t++){
+          // console.log(markerposes[w])
+
+          let p0 = markerposes[w];
+let p1 = markerposes[w + 1];
+let p2 = markerposes[w + 2];
+let p3 = markerposes[w + 3];
+
+
+       
+          let xDerivitive = 
+    3 * (1 - t/100)**2 * (p1.x - p0.x) +
+    6 * (1 - t/100) * (t/100) * (p2.x - p1.x) +
+    3 * (t/100)**2 * (p3.x - p2.x);
+
+let yDerivitive = 
+    3 * (1 - t/100)**2 * (p1.y - p0.y) +
+    6 * (1 - t/100) * (t/100) * (p2.y - p1.y) +
+    3 * (t/100)**2 * (p3.y - p2.y);
+
+
+          // y = ax + b 
+          // b + ax = y
+          // b = y - ax
+         
+
+          // let xDiff = 0;
+
+        
+
+          
+            let x = endcoordsRaw[t].x
+          let y = endcoordsRaw[t].y
+
+
+
+          // let Xmin = x - 100
+          // let Xmax = x + 100
+
+          // let Ymin = a * Xmin + b
+          // let Ymax = a * Xmax + b
+
+          let array = calculateOffsetVar(x,y,xDerivitive,yDerivitive,100)
+
+          // let array = [L.point(Xmin,Ymin),L.point(Xmax,Ymax)]
+          let endArray = unprojectArray(array);
+
+           L.polyline(endArray, {
+            color: 'green',
+            weight: 2,
+           className: 'flat-line'
+        }).addTo(map);
+  
+
+      
+
+
+          
+
+
+
+        
+             
+      }
+    }
+    
    
    }
+  }
+   function calculateRoad(){
+
+   }
   
+   function calculateOffsetVar(xs, ys, dx,dy,distance){
+
+     let rc = dy / dx
+     if (Math.abs(dy) < Math.abs(dx)){
+       rc = dx / dy
+     }
+          // yx.push(rc)
+          let a = -1 / rc
+          // let a = c
+          
+
+     
+      // yˆ2 + (wˆ2 -2wz + zˆ2)
+
+
+          // let b = ys - a * xs
+
+      //ABC formule
+          //a:  1 + aˆ2  
+          //b:  a * b
+          //c:  bˆ2 - dˆ2
+          // D = bˆ2 - 4 * a * c
+          // x1 = (-60 + wortel(D)) / (2 * a))    
+          // x2 = (-60 + wortel(D)) / (2 * a))
+          // y1 = a * x1 + b
+          // y2 = a * x2 + b
+    let A = 1 + a**2
+    let B = a 
+    let C = -1 * distance**2
+    let D = B**2 - 4 * A * C
+    let x1 = (-B + Math.sqrt(D))/(2*A)
+    let x2 = (-B - Math.sqrt(D))/(2*A)
+    let y1 = a * x1 + B
+    let y2 = a * x2 + B
+
+
+   if (Math.abs(dy) < Math.abs(dx)){
+      const z1 = x1
+      const z2 = x2
+      x1 = y1
+      x2 = y2
+      y1 = z1
+      y2 = z2
+    }
+
+
+console.log("A:"+A)
+console.log("B:"+B)
+console.log("C:"+C)
+    console.log("D:"+D)
+
+    let P1 = L.point(xs + x1, ys + y1)
+    let P2 = L.point(xs + x2, ys + y2)
+
+    return [P1,P2]
+
+
+   }
+
+
+
    function unprojectArray(array){
     let newArr = []
     array.forEach(arr => {
